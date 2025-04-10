@@ -32,3 +32,5 @@ Xpath and Class:
     //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[10]
 
     //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[12]
+
+//Utilizar xpath e class para obter caminho e confirmação
