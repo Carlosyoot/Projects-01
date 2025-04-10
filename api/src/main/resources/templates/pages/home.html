@@ -9,7 +9,11 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
+    
     <div class="todo-container">
+        <div class="time-container">
+            <span id="current-time"></span>
+        </div>
         <h1>To-Do List</h1>
         <hr>
 
@@ -24,6 +28,22 @@
 
             <div class="taskList" id="taskList"></div>
             <div class="effect"></div>
+        </div>
+    
+    </div>
+    
+    
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Descrição da Tarefa</h2>
+            <div class="mid">
+                <textarea id="taskDetails" placeholder="Escreva os detalhes da task..." style="padding-left:5px;"></textarea>
+            </div>
+            <div class="footer">
+                <button id="confirmTask">Confirmar</button>
+                <button id="cancelTask"><i class="bx bx-trash"></i></button>
+            </div>
+            
         </div>
     </div>
 </body>
