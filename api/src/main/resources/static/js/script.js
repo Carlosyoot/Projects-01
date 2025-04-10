@@ -13,15 +13,18 @@ async function loadList() {
             
         tasks.forEach(task => {
             const taskElement = `
+
+    <div class="taskI">
     <div class="header-task">
         <div class="titleTask">Título</div>
         <div class="dateFinal">Data</div>
     </div>
     <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
         <input type="text" value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
-        <div class="date ${task.finished ? "finish lthr" : ""}">${new Date(task.createdAt).toLocaleDateString()}</div>
-        <i class="bx bx-trash"></i>
+        <div id="inputTool" class="date ${task.finished ? "finish lthr" : ""}">${new Date(task.createdAt).toLocaleDateString()}</div>
+        <i class="bx bx-trash" id="lx"></i>
         <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
+    </div>
     </div>
 `;
             

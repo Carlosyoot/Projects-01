@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Sistema de OS</title>
+    <style>
+        #aviso-atualizacao {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ffcc00;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Bem-vindo ao Sistema de Ordem de Serviço</h1>
+    <p>Esse é um exemplo de página inicial.</p>
+
+    <div id="aviso-atualizacao">
+        <p>Novas informações disponíveis! <button onclick="location.reload()">Recarregar</button></p>
+    </div>
+
+    <script>
+        const eventSource = new EventSource('/notify/subscribe');
+
+        eventSource.onmessage = function(event) {
+            console.log("Mensagem recebida");
+            const aviso = document.getElementById('aviso-atualizacao');
+            aviso.style.display = 'block';
+        };
+
+        eventSource.onerror = function() {
+            console.error("Erro na conexão SSE.");
+        };
+    </script>
+</body>
+</html>
