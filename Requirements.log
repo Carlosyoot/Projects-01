@@ -5,3 +5,30 @@ Requisitos para futuras aplicações:
 
 Xpath Selenium - Ponto Automatíco 
     Button Mark : //*[@id="root"]/div[1]/div[2]/div/div/div/div/div[1]/div/div/div[1]/div[3]/button
+
+    Confirm Alert Button: //*[@id="react-confirm-alert"]/div/div/div/div/button[1]
+
+    Card Ok: //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div
+
+Xpath and Class:
+
+    Grid: //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div 
+
+    <div class="MuiGrid-root makeStyles-grid-74 MuiGrid-item"><h4 class="makeStyles-registerOk-65">
+    Recibo</h4><h4 class="makeStyles-infoRegistros-62">--------------</h4><h4 class="makeStyles-registerOk-65">CNPJ</h4>
+    <h4 class="makeStyles-infoRegistros-62">----------------------</h4><h4 class="makeStyles-registerOk-65">Razão Social</h4>
+    <h4 class="makeStyles-infoRegistros-62">TECHVS SOLUÇÕES LTDA</h4><h4 class="makeStyles-registerOk-65">PIS</h4>
+    <h4 class="makeStyles-infoRegistros-62">----------------</h4><h4 class="makeStyles-registerOk-65">CPF</h4><h4 class="makeStyles-infoRegistros-62">-------------</h4>
+    <h4 class="makeStyles-registerOk-65">Data/Hora</h4><h4 class="makeStyles-infoRegistros-62">10/04/2025 - 07:45:07</h4></div>
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[2] 
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[4]
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[6]
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[8] 
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[10]
+
+    //*[@id="root"]/div[1]/div[2]/div/div/div/div/div/div/div/div[2]/div/div/h4[12]
