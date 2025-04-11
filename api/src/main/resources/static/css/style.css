@@ -24,9 +24,18 @@ body {
     background-repeat: no-repeat;
 }
 
+.time-container {
+    text-align: left;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #555;
+
+    
+}
+
 
 .todo-container {
-    width: 400px;
+    width: 560px;
     height: auto;
     border: 2px solid var(--color2);
     margin: auto;
@@ -62,9 +71,20 @@ body {
     color: var(--color2);
 }
 
+#addBTN{
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+#addBTN:hover{
+    background-color: black;
+    color: white;
+}
 
 .input-container {
-    height: 25px;
+    height: 40px;
     margin-top: 20px;
     display: flex;
     justify-content: space-between;
@@ -100,17 +120,28 @@ body {
     margin-top: 10px;
 }
 
+
+.taskI:hover .task::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: #25e725;
+  }
+#lx:hover {
+    background-color: #ebebeb;
+    outline: 1px solid black;
+}
+
 .taskI:hover .task > input{
-    background-color: #eee7e7;
+        font-weight: bold;
 }
 
-.taskI:hover .task {
-    background-color: #eee7e7;
-}
 
-.taskI:hover #lx {
-    background-color: #ffffff;
-}
+
+
 
 
 .header-task {
@@ -131,7 +162,6 @@ body {
 
 .header-task .dateFinal{
     width: 30%;
-    font-weight: bold;
     outline: none;
     font-size: 11.5px;
     align-items: center;
@@ -139,21 +169,34 @@ body {
 }
 
 .task > input {
-    width: 60%;
+    width: 55%;
+    padding-left: 5px;
     outline: none;
-    font-size: 15px;
+    font-size: 14px;
+    padding-bottom: 1px;
     border: none;
-    border-bottom: 1px solid black;
 }
 
 .task .date{
-    width: 30%;
+    width: 18%;
     outline: none;
-    font-size: 15px;
+    font-size: 14px;
     align-items: center;
     display: flex;
     color: gray;
 }
+.task #lx{
+    border-radius: 24px;
+    width: 10%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    padding-top: 4px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+
 
 
 
@@ -164,18 +207,17 @@ body {
 
 .tkContainer {
     position: relative;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .tkContainer .taskList {
-    max-height: 200px;
-    overflow-y: visible;
+    max-height: 440px;
+    overflow-y: auto;
     padding-bottom: 20px;
 }
 
 .tkContainer .taskList::-webkit-scrollbar {
-    border: 2px solid var(--color2);
-    margin-left: 10px;
+    width: 4px;
     scrollbar-width: thin;
     
 }
@@ -184,18 +226,6 @@ body {
     background-color: var(--color2);
 }
 
-.tkContainer .effect {
-    width: 100%;
-    height: 20px;
-    background-color: white;
-    position: absolute;
-    bottom: 0;
-}
-
-.finishedDate {
-    color: red;
-    font-weight: bold;
-}
 
 .task:hover  .task-details-tooltip {
     opacity: 1;
@@ -213,7 +243,7 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     border-radius: 8px;
     z-index: 10;
-    top: 100%;
+    top: 115%;
     left: 0;
     white-space: pre-wrap;
     opacity: 0;
@@ -221,9 +251,11 @@ body {
     transition: 0.2s ease;
 }
 
-.tasklist {
-    overflow: auto;
-}
+
+
+
+
+
 
 .modal {
     position: fixed;
@@ -264,9 +296,14 @@ body {
     
 }
 
+#taskDetails{
+    padding-top: 10px;
+}
+
 .footer{
     display: flex;
     flex-direction: row;
+    justify-content: end;
     
     
 }
@@ -280,7 +317,7 @@ body {
     justify-content: center;
     border-radius: 4px;
     display: flex;
-    margin-right: 10px;
+    margin-left: 10px;
 
 }
 
@@ -311,20 +348,71 @@ body {
 
 }
 
-#lx{
-    padding-top: 4px;
-    cursor: pointer;
-}
+
 
 .hidden {
     display: none;
 }
 
-.time-container {
-    text-align: left;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-    color: #555;
+.fancy-divider {
+    width: 100%;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+        to right,
+        var(--color2),
+        var(--color2) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    margin: 10px 0;
+    opacity: 0.4;
+}
 
-    
+.alertSection {
+    padding-top: 10px;
+        display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkboxLabel {
+    font-size: 14px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#alertTimeInput {
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 150px;
+    transition: all 0.3s ease;
+}
+
+.back-button {
+    position: fixed;
+    top: 33%;
+    left: 35%;
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.back-button i {
+    font-size: 22px;
+    margin-right: 8px;
+}
+
+.back-button:hover {
+    color: #555;
 }

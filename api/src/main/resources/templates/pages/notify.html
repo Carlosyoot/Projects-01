@@ -2,6 +2,9 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bem-vindo ao Sistema de OS</title>
     <style>
@@ -18,24 +21,91 @@
     </style>
 </head>
 <body>
-    <h1>Bem-vindo ao Sistema de Ordem de Serviço</h1>
-    <p>Esse é um exemplo de página inicial.</p>
+    <div class="todo-container">
+        <div class="tkContainer">
+            <div class="taskList">
 
-    <div id="aviso-atualizacao">
-        <p>Novas informações disponíveis! <button onclick="location.reload()">Recarregar</button></p>
+                <div class="ItemLi">
+                            <div class="StatusAlert">
+                                <span class="statusDot"></span>
+                                <span class="statusText">Finalizou</span>
+                            </div>
+                            <div class="task">
+                                <div class="startLeft">
+                                    <div class="randomIconUser"></div>
+                                    <div class="nameUser">Carlos dddd dddd</div>
+                                </div>
+                                <div class="startMid">                                
+                                    Tarefa de exemplo
+                                    
+                                </div>
+                                <div class="startEnd">
+                                    <div class="dateTime">
+                                        <div class="date">10/04/2025</div>
+                                        <div class="time">21:34</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fancy-divider"></div>
+                </div>
+            </div>
+
+            
+
+        </div>
     </div>
+    <button onclick="trocarFotoLego()" style="position: fixed; top: 20px; right: 20px; z-index: 999;">Nova Foto LEGO</button>
+    <button class="back-button" onclick="window.location.href='http://localhost:8080/Todolist'">
+        <i class='bx bx-right-arrow-alt'></i> Notificações
+    </button>
+
 
     <script>
+        function getRandomLegoImage() {
+            const randomNum = Math.floor(Math.random() * 9) + 1;
+            return `https://randomuser.me/api/portraits/lego/${randomNum}.jpg`;
+        }
+    
+        function trocarFotoLego() {
+            const icon = document.querySelector('.randomIconUser');
+            if (icon) {
+                icon.style.backgroundImage = `url('${getRandomLegoImage()}')`;
+            }
+        }
+    
         const eventSource = new EventSource('/notify/subscribe');
-
+    
         eventSource.onmessage = function(event) {
-            console.log("Mensagem recebida");
-            const aviso = document.getElementById('aviso-atualizacao');
-            aviso.style.display = 'block';
+            console.log("⚡ Aviso recebido!");
+    
+            let avisos = JSON.parse(localStorage.getItem('avisos')) || [];
+    
+            avisos.push({
+                data: new Date().toLocaleString(),
+                mensagem: "Novo aviso recebido"
+            });
+    
+            localStorage.setItem('avisos', JSON.stringify(avisos));
+    
+            if (document.visibilityState === 'visible') {
+                alert("⚠️ Novo aviso recebido!");
+            }
         };
-
+    
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'visible') {
+                let avisos = JSON.parse(localStorage.getItem('avisos')) || [];
+    
+                if (avisos.length > 0) {
+                    alert(`📢 Você recebeu ${avisos.length} aviso(s) enquanto estava fora.`);
+    
+                    localStorage.removeItem('avisos');
+                }
+            }
+        });
+    
         eventSource.onerror = function() {
-            console.error("Erro na conexão SSE.");
+            console.error("❌ Erro na conexão SSE.");
         };
     </script>
 </body>

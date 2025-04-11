@@ -26,6 +26,8 @@ async function loadList() {
         <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
     </div>
     </div>
+    <div class="fancy-divider"></div>
+
 `;
             
             taskList.innerHTML += taskElement;
@@ -193,6 +195,17 @@ document.addEventListener("dblclick", (e) => {
     }
 });
 
+const sendAlertCheckbox = document.getElementById('sendAlertCheckbox');
+const alertTimeInput = document.getElementById('alertTimeInput');
+
+sendAlertCheckbox.addEventListener('change', () => {
+    if (sendAlertCheckbox.checked) {
+        alertTimeInput.classList.remove('hidden');
+    } else {
+        alertTimeInput.classList.add('hidden');
+    }
+});
+
 function updateClock() {
     const now = new Date();
     const timeElement = document.getElementById('current-time');
@@ -204,6 +217,7 @@ function updateClock() {
     
     timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
+
 
 // Atualiza o relógio imediatamente e a cada segundo
 updateClock();
