@@ -133,7 +133,7 @@ addBTN.addEventListener("click", (e) => {
     }
     
     if (inputText.value !== "") {
-        showTaskDetailsModal(inputText.value); // Novo modal para descrição
+        showTaskDetailsModal(inputText.value);
     }
 });
 
@@ -155,45 +155,164 @@ document.addEventListener("click", (e) => {
                 finished: !isFinished
             }).then(() => {
                 if (!isFinished) {
-                    sendTaskCompletedNotification(taskId);
+                    sendDiscord(taskId);
                 }
             });
         }
     }
 });
 
-async function sendTaskCompletedNotification(taskId) {
+async function sendDiscord(taskId) {
     try {
-        const response = await fetch('http://localhost:8080/api/tasks/notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ taskId })
-        });
-        
-        if (!response.ok) {
-            console.error("Falha ao enviar notificação");
+        const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
+        if (!taskElement) {
+            console.warn("Task não encontrada com ID:", taskId);
+            return;
         }
-    } catch (error) {
-        console.error("Erro ao enviar notificação:", error);
+
+        const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
+
+        const finalDate = new Date().toLocaleString("pt-BR");
+
+        const mensagemDiscord = `✅ **${title}** foi finalizada em ${finalDate}`;
+
+        const response = await fetch('/discord/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mensagem: mensagemDiscord
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        console.log("Mensagem enviada pro Discord 🚀");
+
+    } catch (err) {
+        console.error("Erro ao enviar mensagem pro Discord:", err);
     }
 }
 
-document.addEventListener("dblclick", (e) => {
-    const targetElement = e.target;
-    
-    if (targetElement.classList.contains("inputTaskItem")) {
-        targetElement.classList.remove("lthr");
-        targetElement.readOnly = false;
-        
-        targetElement.addEventListener("blur", () => {
-            const taskId = targetElement.closest('.task').dataset.id;
-            updateTask(taskId, {
-                message: targetElement.value,
-                finished: targetElement.classList.contains("finish")
-            });
-        }, { once: true }); // O listener será removido após ser executado uma vez
-    }
-});
+async function sendTaskCompletedNotification(taskId) {
+
+    console.log("eba");
+
+    //            const taskElement = targetElement.closest('.task');
+
+    const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
+    const finalDate = new Date().toLocaleString("pt-BR");
+
+    const mensagemDiscord = `📝 *${title}* foi finalizada em ${finalDate}`;
+                
+                try {
+                    const response = await fetch('/discord/post', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            mensagem: mensagemDiscord
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    console.log("Mensagem enviada pro Discord 🚀");
+                } catch (err) {
+                    console.error("Erro ao enviar mensagem pro Discord:", err);
+                    
+                }
+
+    //console.log("finalizado")
+    //try {
+    //    const response = await fetch('http://localhost:8080/api/tasks/notify', {
+    //        method: 'POST',
+    //        headers: { 'Content-Type': 'application/json' },
+    //        body: JSON.stringify({ taskId })
+    //    });
+    //    
+    //    if (!response.ok) {
+    //        console.error("Falha ao enviar notificação");
+    //    }
+    //} catch (error) {
+    //    console.error("Erro ao enviar notificação:", error);
+    //}
+}
+
+//document.addEventListener("dblclick", async (e) => {
+//    const targetElement = e.target;
+//
+//    console.log("dblclick entrou")
+//    
+//    if (targetElement.classList.contains("inputTaskItem")) {
+//        targetElement.classList.remove("lthr");
+//        targetElement.readOnly = false;
+//        
+//        targetElement.addEventListener("blur", async () => {
+//            const taskElement = targetElement.closest('.task');
+//            const taskId = taskElement.dataset.id;
+//        
+//            const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
+//            const finalDate = new Date().toLocaleString("pt-BR");
+//        
+//            //await updateTask(taskId, {
+//            //    message: targetElement.value,
+//            //    finished: targetElement.classList.contains("finish")
+//            //});
+//        //
+//            //if (targetElement.classList.contains("finish")) {
+//            //    const mensagemDiscord = `📝 *${title}* foi finalizada em ${finalDate}`;
+//            //    
+//            //    try {
+//            //        const response = await fetch('/discord/post', {
+//            //            method: 'POST',
+//            //            headers: {
+//            //                'Content-Type': 'application/json'
+//            //            },
+//            //            body: JSON.stringify({
+//            //                mensagem: mensagemDiscord
+//            //            })
+//            //        });
+//            //        
+//            //        if (!response.ok) {
+//            //            throw new Error(`HTTP error! status: ${response.status}`);
+//            //        }
+//            //        console.log("Mensagem enviada pro Discord 🚀");
+//            //    } catch (err) {
+//            //        console.error("Erro ao enviar mensagem pro Discord:", err);
+//            //        
+//            //    }
+//            //}
+//
+//            const mensagemDiscord = `📝 *${title}* foi finalizada em ${finalDate}`;
+//                
+//                try {
+//                    const response = await fetch('/discord/post', {
+//                        method: 'POST',
+//                        headers: {
+//                            'Content-Type': 'application/json'
+//                        },
+//                        body: JSON.stringify({
+//                            mensagem: mensagemDiscord
+//                        })
+//                    });
+//                    
+//                    if (!response.ok) {
+//                        throw new Error(`HTTP error! status: ${response.status}`);
+//                    }
+//                    console.log("Mensagem enviada pro Discord 🚀");
+//                } catch (err) {
+//                    console.error("Erro ao enviar mensagem pro Discord:", err);
+//                    
+//                }
+//        }, { once: true });
+//    }   
+//});
 
 const sendAlertCheckbox = document.getElementById('sendAlertCheckbox');
 const alertTimeInput = document.getElementById('alertTimeInput');
@@ -217,6 +336,7 @@ function updateClock() {
     
     timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
+
 
 
 // Atualiza o relógio imediatamente e a cada segundo

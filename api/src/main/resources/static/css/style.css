@@ -263,6 +263,7 @@ body {
     left: 0;
     background: rgba(0,0,0,0.5);
     width: 100vw;
+    z-index: 99;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -280,6 +281,7 @@ body {
     flex-direction: column;
     border-radius: 12px;
     width: 80%;
+    z-index: 999;
     max-width: 400px;
 }
 
@@ -296,7 +298,7 @@ body {
     
 }
 
-#taskDetails{
+#taskDetails, #taskDetailsAll{
     padding-top: 10px;
 }
 
@@ -308,7 +310,7 @@ body {
     
 }
 
-.footer #confirmTask{
+.footer #confirmTask, #confirmTaskTodos{
     background-color: rgb(69, 182, 84);
     outline: none;
     border: none;
@@ -321,7 +323,7 @@ body {
 
 }
 
-.footer #cancelTask{
+.footer #cancelTask, #cancelTaskTodos{
     background-color: rgb(179, 50, 18);
     outline: none;
     height: 30px;
@@ -368,7 +370,7 @@ body {
     opacity: 0.4;
 }
 
-.alertSection {
+.alertSection, .alertSectionAll {
     padding-top: 10px;
         display: flex;
     flex-direction: column;
@@ -383,7 +385,7 @@ body {
     gap: 8px;
 }
 
-#alertTimeInput {
+#alertTimeInput, #alertTimeAllInput {
     padding: 5px 10px;
     border-radius: 6px;
     text-align: center;
@@ -405,6 +407,7 @@ body {
     align-items: center;
     cursor: pointer;
     font-weight: 500;
+    z-index: 2;
     transition: color 0.2s ease;
 }
 
@@ -415,4 +418,14 @@ body {
 
 .back-button:hover {
     color: #555;
+}
+
+.task-title-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    margin-bottom: 10px;
 }
