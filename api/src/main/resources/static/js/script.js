@@ -20,8 +20,8 @@ async function loadList() {
         <div class="dateFinal">Data</div>
     </div>
     <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
-        <input type="text" value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
-        <div id="inputTool" class="date ${task.finished ? "finish lthr" : ""}">${new Date(task.createdAt).toLocaleDateString()}</div>
+        <input id="input-title" type="text"  value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
+        <input class="input-title" type="text" value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
         <i class="bx bx-trash" id="lx"></i>
         <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
     </div>
@@ -126,8 +126,8 @@ addBTN.addEventListener("click", (e) => {
     e.preventDefault();
 
     inputText.value.trim().split(/\s+/);
-    if (inputText.value.length> 18 || inputText.value.length <=0) {
-        alert("O título não pode ter mais que 18 palavras ou estar vazio.");
+    if (inputText.value.length> 30 || inputText.value.length <=0) {
+        alert("O título não pode ter mais que 30 palavras ou estar vazio.");
 
         return;
     }
@@ -170,8 +170,14 @@ async function sendDiscord(taskId) {
             return;
         }
 
-        const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
+        const inputTitleElement = taskElement.querySelector('.input-title');
+        
+        if (!inputTitleElement) {
+            console.warn("Input com ID 'input-title' não encontrado.");
+            return;
+        }
 
+        const title = inputTitleElement.value || "Sem título";
         const finalDate = new Date().toLocaleString("pt-BR");
 
         const mensagemDiscord = `✅ **${title}** foi finalizada em ${finalDate}`;

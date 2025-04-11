@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/styles.css">
+    <script src="/js/scriptNotify.js" defer></script>
+
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,10 +63,10 @@
 
 
     <script>
-        function getRandomLegoImage() {
-            const randomNum = Math.floor(Math.random() * 9) + 1;
-            return `https://randomuser.me/api/portraits/lego/${randomNum}.jpg`;
-        }
+        //document.addEventListener('DOMContentLoaded', function() {
+        //    // Se necessário, passe parâmetros para NotificationBuilder aqui
+        //    NotificationBuilder();  // Chama o NotificationBuilder para gerar as notificações
+        //});
     
         function trocarFotoLego() {
             const icon = document.querySelector('.randomIconUser');
@@ -74,37 +76,35 @@
         }
     
         const eventSource = new EventSource('/notify/subscribe');
-    
+        
         eventSource.onmessage = function(event) {
             console.log("⚡ Aviso recebido!");
-    
+        
             let avisos = JSON.parse(localStorage.getItem('avisos')) || [];
-    
+        
             avisos.push({
                 data: new Date().toLocaleString(),
                 mensagem: "Novo aviso recebido"
             });
-    
+        
             localStorage.setItem('avisos', JSON.stringify(avisos));
-    
+        
             if (document.visibilityState === 'visible') {
                 alert("⚠️ Novo aviso recebido!");
             }
         };
-
     
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === 'visible') {
                 let avisos = JSON.parse(localStorage.getItem('avisos')) || [];
-    
+        
                 if (avisos.length > 0) {
                     alert(`📢 Você recebeu ${avisos.length} aviso(s) enquanto estava fora.`);
-    
                     localStorage.removeItem('avisos');
                 }
             }
         });
-    
+        
         eventSource.onerror = function() {
             console.error("❌ Erro na conexão SSE.");
         };
