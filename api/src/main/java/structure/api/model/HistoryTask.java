@@ -1,5 +1,8 @@
 package structure.api.model;
 
+import java.util.Date;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,7 +18,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "historytask")
+@Table(name = "TaskHistory")
 
 public class HistoryTask {
 
@@ -23,19 +26,23 @@ public class HistoryTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String status;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String details;
+
+    @Column(nullable = false)
     private String user;
-    private String date;
-    private String hour;
 
-    public HistoryTask(String name, String status, String user, String date, String hour){
-        this.name = name;
-        this.status = status;
-        this.date = date;
-        this.hour = hour;
+    @Column(nullable = false)
+    private Integer progress;
 
+    @Column(length = 1)
+    private String status;
 
-    }
+    private Date end;
+    
     
 }

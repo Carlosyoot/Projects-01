@@ -1,87 +1,123 @@
 const inputText = document.getElementById("inputText");
 const addBTN = document.getElementById("addBTN");
 const taskList = document.getElementById("taskList");
+const modal = document.getElementById("modal");
+const confirmBtn = document.getElementById("confirmTask");
+const cancelBtn = document.getElementById("cancelTask");
+const taskDetailsInput = document.getElementById("taskDetails");
+
 
 const API_URL = 'http://localhost:8080/api/tasks';
 
-async function loadList() {
+
+
+const loadList = async () => {
     try {
         const response = await fetch(API_URL);
-        const tasks = await response.json();
         
-        taskList.innerHTML = "";
-            
-        tasks.forEach(task => {
-            const taskElement = `
-
-    <div class="taskI">
-    <div class="header-task">
-        <div class="titleTask">Título</div>
-        <div class="dateFinal">Data</div>
-    </div>
-    <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
-        <input id="input-title" type="text"  value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
-        <input class="input-title" type="text" value="${task.message}" readonly class="inputTaskItem ${task.finished ? "finish lthr" : ""}">
-        <i class="bx bx-trash" id="lx"></i>
-        <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
-    </div>
-    </div>
-    <div class="fancy-divider"></div>
-
-`;
-            
-            taskList.innerHTML += taskElement;
-        });
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        const tasks = await response.json();
+        renderTasks(tasks);
     } catch (error) {
         console.error("Erro ao carregar tarefas:", error);
+        showError("Não foi possível carregar as tarefas");
     }
-}
+};
 
-function showTaskDetailsModal(taskText) {
-    document.getElementById("modal").classList.remove("hidden");
+const renderTasks = (tasks) => {
 
-    const confirmBtn = document.getElementById("confirmTask");
-    const cancelBtn = document.getElementById("cancelTask");
+    for (let task of tasks) {
+        console.log(task); 
+    }
 
-    confirmBtn.onclick = () => {
-        const details = document.getElementById("taskDetails").value.trim();
-        if (details === "") {
-            alert("Adicione detalhes antes de criar a tarefa.");
-            return;
-        }
+    taskList.innerHTML = tasks.map(task => `
+        <div class="taskI">
+            <div class="header-task">
+                <div class="titleTask">Título</div>
+                <div class="dateFinal">Data</div>
+            </div>
+            <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
+                <input type="text" value="${task.title}" readonly 
+                       class="inputTaskItem${task.finished ? " finish lthr" : ""}">
+                <div class="date${task.finished ? " finish lthr" : ""}">
+                    ${formatDateTask(task.createdAt)}
+                </div>
+                <i class="bx bx-trash" id="lx"></i>
+                <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
+            </div>
+        </div>
+        <div class="fancy-divider"></div>
+    `).join('');
+};
 
-        addTask(taskText, details);
-        document.getElementById("modal").classList.add("hidden");
-        inputText.value = "";
-        document.getElementById("taskDetails").value = "";
-    };
-
-    cancelBtn.onclick = () => {
-        document.getElementById("modal").classList.add("hidden");
-        document.getElementById("taskDetails").value = "";
-    };
-}
-
-// Atualize a função addTask
-async function addTask(taskText, details = "") {
+const addTask = async (taskText, details = "") => {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: taskText,
+                title: taskText,  
                 details: details,
                 finished: false
             })
         });
 
-        if (response.ok) {
-            loadList();
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
         }
+
+        await loadList();
+        return await response.json();
     } catch (error) {
-        console.error("Erro ao adicionar tarefa:", error);
+        console.error("Erro detalhado ao adicionar tarefa:", error);
+        showError(error.message || "Não foi possível adicionar a tarefa");
+        throw error;
     }
-}
+};
+
+
+const showTaskDetailsModal = (taskText) => {
+    modal.classList.remove("hidden");
+    
+    const handleConfirm = () => {
+        const details = taskDetailsInput.value.trim();
+        
+        if (!details) {
+            showError("Adicione detalhes antes de criar a tarefa");
+            return;
+        }
+
+        addTask(taskText, details);
+        closeModal();
+    };
+
+    const handleCancel = () => {
+        closeModal();
+    };
+
+    confirmBtn.onclick = handleConfirm;
+    cancelBtn.onclick = handleCancel;
+};
+
+const closeModal = () => {
+    modal.classList.add("hidden");
+    inputText.value = "";
+    taskDetailsInput.value = "";
+    
+   
+    confirmBtn.onclick = null;
+    cancelBtn.onclick = null;
+};
+
+const showError = (message) => {
+    alert(message); // Pode ser substituído por um toast ou modal de erro
+};
+    
+
 
 // Atualiza uma tarefa existente
 async function updateTask(id, updatedTask) {
@@ -126,8 +162,8 @@ addBTN.addEventListener("click", (e) => {
     e.preventDefault();
 
     inputText.value.trim().split(/\s+/);
-    if (inputText.value.length> 30 || inputText.value.length <=0) {
-        alert("O título não pode ter mais que 30 palavras ou estar vazio.");
+    if (inputText.value.length> 18 || inputText.value.length <=0) {
+        alert("O título não pode ter mais que 18 palavras ou estar vazio.");
 
         return;
     }
@@ -170,14 +206,8 @@ async function sendDiscord(taskId) {
             return;
         }
 
-        const inputTitleElement = taskElement.querySelector('.input-title');
-        
-        if (!inputTitleElement) {
-            console.warn("Input com ID 'input-title' não encontrado.");
-            return;
-        }
+        const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
 
-        const title = inputTitleElement.value || "Sem título";
         const finalDate = new Date().toLocaleString("pt-BR");
 
         const mensagemDiscord = `✅ **${title}** foi finalizada em ${finalDate}`;
@@ -342,6 +372,16 @@ function updateClock() {
     
     timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
+
+
+
+
+////////////////////////////////FUNÇÃO DE FORMATAÇÃO
+
+const formatDateTask= (dateString) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+};
 
 
 

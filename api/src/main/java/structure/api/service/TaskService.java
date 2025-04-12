@@ -1,44 +1,73 @@
 package structure.api.service;
 
-import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import structure.api.model.Task;
 import structure.api.repository.TaskRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TaskService {
-    private final TaskRepository taskRepository;
     
-    public TaskService(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
-    }
-    
-    public List<Task> findAll() {
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Transactional(readOnly = true)
+    public List<Task> findAllTasks() {
         return taskRepository.findAll();
     }
     
-    public Task save(Task task) {
+    @Transactional(readOnly = true)
+    public Task findTaskById(Long id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+    }
+    
+    @Transactional
+    public Task createTask(Task task) {
+        task.setCreatedAt(LocalDateTime.now());
         return taskRepository.save(task);
     }
     
-    public Optional<Task> findById(Long id) {
-        return taskRepository.findById(id);
+    @Transactional
+    public Task updateTask(Long id, Task taskDetails) {
+        Task existingTask = findTaskById(id);
+        
+        existingTask.setTitle(taskDetails.getTitle());
+        existingTask.setDetails(taskDetails.getDetails());
+        existingTask.setFinished(taskDetails.isFinished());
+        existingTask.setUpdatedAt(LocalDateTime.now());
+        
+        return taskRepository.save(existingTask);
     }
     
-    public void deleteById(Long id) {
-        taskRepository.deleteById(id);
+    @Transactional
+    public void deleteTask(Long id) {
+        Task task = findTaskById(id);
+        taskRepository.delete(task);
     }
     
-    public Task update(Long id, Task taskDetails) {
-        return taskRepository.findById(id)
-            .map(task -> {
-                task.setMessage(taskDetails.getMessage());
-                task.setFinished(taskDetails.isFinished());
-                return taskRepository.save(task);
-            })
-            .orElseThrow(() -> new RuntimeException("Task not found with id " + id));
+    @Transactional
+    public Task markAsFinished(Long id) {
+        Task task = findTaskById(id);
+        task.setFinished(true);
+        task.setUpdatedAt(LocalDateTime.now());
+        return taskRepository.save(task);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Task> findFinishedTasks() {
+        return taskRepository.findByFinishedTrue();
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Task> findPendingTasks() {
+        return taskRepository.findByFinishedFalse();
     }
 }
