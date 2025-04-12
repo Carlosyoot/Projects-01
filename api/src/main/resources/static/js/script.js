@@ -165,8 +165,8 @@ addBTN.addEventListener("click", (e) => {
     e.preventDefault();
 
     inputText.value.trim().split(/\s+/);
-    if (inputText.value.length> 18 || inputText.value.length <=0) {
-        alert("O título não pode ter mais que 18 palavras ou estar vazio.");
+    if (inputText.value.length> 30 || inputText.value.length <=0) {
+        alert("O título não pode ter mais que 30 palavras ou estar vazio.");
 
         return;
     }
@@ -178,28 +178,41 @@ addBTN.addEventListener("click", (e) => {
 
 document.addEventListener("click", (e) => {
     const targetElement = e.target;
-    
+
     if (targetElement.classList.contains("bx-trash")) {
         const taskId = targetElement.closest('.task').dataset.id;
         deleteTask(taskId);
     }
-    
+
     if (targetElement.classList.contains("inputTaskItem")) {
-        if (targetElement.readOnly) {
-            const taskId = targetElement.closest('.task').dataset.id;
-            const isFinished = targetElement.classList.contains("finish");
-            
-            updateTask(taskId, {
-                message: targetElement.value,
-                finished: !isFinished
-            }).then(() => {
-                if (!isFinished) {
-                    sendDiscord(taskId);
-                }
-            });
-        }
+        const taskElement = targetElement;
+        const taskId = taskElement.closest('.task').dataset.id;
+
+        const isFinished = taskElement.classList.contains("finish");
+
+        updateTask(taskId, {
+            message: taskElement.value,
+            finished: !isFinished
+        }).then(() => {
+            taskElement.classList.toggle("finish");
+            taskElement.classList.toggle("lthr");
+
+            const dateElement = taskElement
+                .closest(".task")
+                .querySelector(".date");
+
+            if (dateElement) {
+                dateElement.classList.toggle("finish");
+                dateElement.classList.toggle("lthr");
+            }
+
+            if (!isFinished) {
+                sendDiscord(taskId);
+            }
+        });
     }
 });
+
 
 async function sendDiscord(taskId) {
 
