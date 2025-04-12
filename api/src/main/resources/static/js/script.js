@@ -42,7 +42,8 @@ const renderTasks = (tasks) => {
             <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
                 <input type="text" value="${task.title}" readonly 
                        class="inputTaskItem${task.finished ? " finish lthr" : ""}">
-                <div class="date${task.finished ? " finish lthr" : ""}">
+                <div class="date${task.finished ? " finish lthr" : ""}" 
+                     data-original-date="${task.createdAt}">  
                     ${formatDateTask(task.createdAt)}
                 </div>
                 <i class="bx bx-trash" id="lx"></i>
@@ -121,21 +122,23 @@ const showError = (message) => {
 
 // Atualiza uma tarefa existente
 async function updateTask(id, updatedTask) {
-    try {
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedTask)
-        });
-        
-        if (response.ok) {
-            loadList();
-        }
-    } catch (error) {
-        console.error("Erro ao atualizar tarefa:", error);
-    }
+
+    console.log("update")
+        //try {
+        //    const response = await fetch(`${API_URL}/${id}`, {
+        //        method: 'PUT',
+        //        headers: {
+        //            'Content-Type': 'application/json',
+        //        },
+        //        body: JSON.stringify(updatedTask)
+        //    });
+        //    
+        //    if (response.ok) {
+        //        loadList();
+        //    }
+        //} catch (error) {
+        //    console.error("Erro ao atualizar tarefa:", error);
+        //}
 }
 
 // Remove uma tarefa
@@ -199,34 +202,45 @@ document.addEventListener("click", (e) => {
 });
 
 async function sendDiscord(taskId) {
+
+    const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
+
+
     try {
-        const taskElement = document.querySelector(`.task[data-id="${taskId}"]`);
         if (!taskElement) {
             console.warn("Task não encontrada com ID:", taskId);
             return;
         }
 
-        const title = taskElement.previousElementSibling.querySelector('.titleTask')?.textContent || "Sem título";
+        const title = taskElement.querySelector('input[type="text"]').value;
+        const details = taskElement.getAttribute('title') || 'Sem detalhes';
+        const dateElement = taskElement.querySelector('.date').textContent;
+        const originalDate = taskElement.querySelector('.date').getAttribute('data-original-date');
 
-        const finalDate = new Date().toLocaleString("pt-BR");
 
-        const mensagemDiscord = `✅ **${title}** foi finalizada em ${finalDate}`;
+        const discordPayload = {
+            usuario: "123456789012345678", 
+            titulo: title,
+            detalhe: details,
+            tipo: "finalizou",
+            dataHora:originalDate
+        };
+
+        console.log("Enviando para Discord:", discordPayload);
 
         const response = await fetch('/discord/post', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                mensagem: mensagemDiscord
-            })
+            body: JSON.stringify(discordPayload)
         });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        console.log("Mensagem enviada pro Discord 🚀");
+        console.log("Mensagem enviada pro Discord com sucesso 🚀");
 
     } catch (err) {
         console.error("Erro ao enviar mensagem pro Discord:", err);

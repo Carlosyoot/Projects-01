@@ -23,15 +23,18 @@ public class DiscordDTO {
             : "**progrediu " + percentual + "% na tarefa**";
         
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm");
+        String divisoria = "\n" + "═".repeat(20) + "\n";  
         
         return String.format(
-            "<@%s>\n%s %s\n%s%s /-/\n%s",
+            "%s\n<@%s>\n%s %s\n\t%s%s\n\t%s\n%s",
+            divisoria,
             usuario,
             emoji,
-            acao,  
+            acao,
             titulo,
             (detalhe != null && !detalhe.isEmpty()) ? " - " + detalhe : "",
-            dataHora.format(df)
+            dataHora.format(df),
+            divisoria
         );
     }
 }
