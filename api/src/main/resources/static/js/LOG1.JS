@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await addDefaultTaskToDOM();
     updateClock();
     setInterval(updateClock, 1000);
+
 });
 
 //////////EVENTOS DE CLIQUE - CHANGE
@@ -127,39 +128,48 @@ document.addEventListener("DOMContentLoaded", () => {
     const linkedOrgsContainer = document.getElementById("linkedOrgsCustom");
     const createOrgBtn = document.getElementById("createOrg");
     const orgNameInput = document.getElementById("orgNameInput");
-    
+
+    let orgs = ['ida328432'];
 
     const renderOrgs = () => {
-        const user = getUser();
         linkedOrgsContainer.innerHTML = "";
-        user.orgs.forEach((orgId) => {
+    
+        orgs.forEach((orgId) => {
+
+            const orgMembers = Math.floor(Math.random() * 5) + 1; 
+    
             const orgDiv = document.createElement("div");
             orgDiv.className = "org-box";
-            orgDiv.style.border = "1px solid #333";
-            orgDiv.style.padding = "10px";
-            orgDiv.style.flex = "1";
             orgDiv.innerHTML = `
-                <strong>${orgId}</strong><br>
-                <button onclick="copyOrgLink('${orgId}')">Obter Link</button>
-                <button onclick="removeOrg('${orgId}')">Sair</button>
+                <div class="orgI">
+                    <div class="org-name">
+                        <strong>Organização ${orgId}</strong>
+                    </div>
+    
+                    <div class="org-members">
+                        <i class='bx bx-user'></i>
+                        <span>${orgMembers} membro${orgMembers > 1 ? "s" : ""} conectado${orgMembers > 1 ? "s" : ""}</span>
+                    </div>
+    
+                    <div class="org-options">
+                        <button onclick="copyOrgLink('${orgId}')">Obter Link</button>
+                        <button onclick="removeOrg('${orgId}')">Sair</button>
+                    </div>
+                </div>
             `;
             linkedOrgsContainer.appendChild(orgDiv);
         });
     };
 
-    
-
     createOrgBtn.addEventListener("click", () => {
         const orgName = orgNameInput.value.trim();
         if (!orgName) return alert("Digite um nome para a organização");
 
-        const orgId = "org-" + Math.random().toString(36).substring(2, 8);
-        const user = getUser();
+        const orgId = "org-1" + Math.random().toString(36).substring(2, 8);
+        
+        if (orgs.length >= 3) return alert("Você já está em 3 organizações");
 
-        if (user.orgs.length >= 3) return alert("Você já está em 3 organizações");
-
-        user.orgs.push(orgId);
-        saveUser(user);
+        orgs.push(orgId);
         renderOrgs();
         alert("Organização criada! Link copiado.");
         copyOrgLink(orgId);
@@ -172,24 +182,25 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.removeOrg = (orgId) => {
-        let user = getUser();
-        user.orgs = user.orgs.filter((org) => org !== orgId);
-        saveUser(user);
+        orgs = orgs.filter((org) => org !== orgId);
         renderOrgs();
     };
 
-    // Ao acessar com ?org=...
     const params = new URLSearchParams(window.location.search);
     const orgParam = params.get("org");
     if (orgParam) {
-        let user = getUser();
-        if (!user.orgs.includes(orgParam) && user.orgs.length < 3) {
-            user.orgs.push(orgParam);
-            saveUser(user);
+        if (!orgs.includes(orgParam) && orgs.length < 3) {
+            orgs.push(orgParam);
             alert("Você foi adicionado à organização: " + orgParam);
+            renderOrgs();
         }
     }
+
+    renderOrgs();
+
+
 });
+
 
 
 

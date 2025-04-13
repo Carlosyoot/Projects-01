@@ -565,3 +565,23 @@ body {
 .hidden-org {
     display: flex;
 }
+
+.org-box{
+    border :1px solid #333;
+    padding: 10px;
+    flex: 1;
+}
+
+.org-box .orgI{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 2px solid red;
+}
+
+.org-box .org-options{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+}
