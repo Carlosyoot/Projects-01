@@ -10,6 +10,12 @@ const taskDetailsInput = document.getElementById("taskDetails");
 const API_URL = 'http://localhost:8080/api/tasks';
 
 
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadList();
+    await addDefaultTaskToDOM();
+});
+
+
 
 const loadList = async () => {
     try {
@@ -38,6 +44,8 @@ const renderTasks = (tasks) => {
             <div class="header-task">
                 <div class="titleTask">Título</div>
                 <div class="dateFinal">Data</div>
+                <div class="progress">Progresso: ${task.progress || '0%'}</div>
+
             </div>
             <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
                 <input type="text" value="${task.title}" readonly 
@@ -46,6 +54,7 @@ const renderTasks = (tasks) => {
                      data-original-date="${task.createdAt}">  
                     ${formatDateTask(task.createdAt)}
                 </div>
+                <i class="bx bx-edit edit-btn" data-id="${task.id}" id="edit"></i>
                 <i class="bx bx-trash" id="lx"></i>
                 <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
             </div>
@@ -53,6 +62,45 @@ const renderTasks = (tasks) => {
         <div class="fancy-divider"></div>
     `).join('');
 };
+
+const addDefaultTaskToDOM = () => {
+
+    console.log("detalhe task dom")
+
+    const task = {
+        id: 543, // pode ser qualquer ID fictício
+        title: "Implementação Default",
+        details: "Criar endpoints para tasks",
+        createdAt: new Date().toISOString(),
+        finished: false
+    };
+
+    const taskHTML = `
+        <div class="taskI">
+            <div class="header-task">
+                <div class="titleTask">Título</div>
+                <div class="dateFinal">Data</div>
+                <div class="progress">Progresso: ${task.progress || '0%'}</div>
+
+            </div>
+            <div class="task hover-info" data-id="${task.id}" title="${task.details || 'Sem detalhes'}">
+                <input type="text" value="${task.title}" readonly 
+                       class="inputTaskItem${task.finished ? " finish lthr" : ""}">
+                <div class="date${task.finished ? " finish lthr" : ""}" 
+                     data-original-date="${task.createdAt}">  
+                    ${formatDateTask(task.createdAt)}
+                </div>
+                <i class="bx bx-edit edit-btn" data-id="${task.id}" id="edit"></i>
+                <i class="bx bx-trash" id="lx"></i>
+                <div class="task-details-tooltip">${task.details || "Sem detalhes"}</div>
+            </div>
+        </div>
+        <div class="fancy-divider"></div>
+    `;
+
+    taskList.insertAdjacentHTML('afterbegin', taskHTML);
+};
+
 
 const addTask = async (taskText, details = "") => {
     try {
@@ -120,7 +168,7 @@ const showError = (message) => {
     
 
 
-// Atualiza uma tarefa existente
+
 async function updateTask(id, updatedTask) {
 
     console.log("update")
@@ -141,7 +189,8 @@ async function updateTask(id, updatedTask) {
         //}
 }
 
-// Remove uma tarefa
+
+
 async function deleteTask(id) {
     try {
         const response = await fetch(`${API_URL}/${id}`, {
@@ -156,10 +205,7 @@ async function deleteTask(id) {
     }
 }
 
-// Event Listeners
-document.addEventListener("DOMContentLoaded", () => {
-    loadList();
-});
+
 
 addBTN.addEventListener("click", (e) => {
     e.preventDefault();
@@ -415,3 +461,9 @@ const formatDateTask= (dateString) => {
 // Atualiza o relógio imediatamente e a cada segundo
 updateClock();
 setInterval(updateClock, 1000);
+
+
+
+document.getElementById("cancelTask").addEventListener("click", () => {
+    document.getElementById("modal").classList.add("hidden");
+});
