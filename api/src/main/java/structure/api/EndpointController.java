@@ -18,6 +18,12 @@ public class EndpointController {
     public String returnHomePage() {
         return "/pages/home";
     }
+
+    @GetMapping("/join/{orgId}")
+    public String showJoinPage() {
+        return "/pages/join.html"; 
+    }
+
     
     
 }
