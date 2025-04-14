@@ -711,24 +711,52 @@ body {
   }
   
 .modal-content-username {
-  background: white;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
+    background: white;
+    width: 400px;
+    height: 160px;
+    box-sizing: content-box;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid green;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 10px;
+    text-align: center;
 }
 
 .modal-content-username input {
-  width: 100%;
+  width: 85%;
   padding: 10px;
-  margin: 15px 0;
+  box-sizing: border-box    ;
   border: 1px solid #aaa;
   border-radius: 6px;
 }
 
 .modal-actions-username {
-  display: flex;
-  justify-content: center;
-}
+    display: flex;
+    justify-content: flex-end; 
+    width: 85%; 
+  }
+
+#confirmUsername{
+    background-color: rgb(69, 182, 135);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 6px;
+    }
+
+#confirmUsername:hover{
+    background-color: rgb(50, 153, 64);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 6px;
+    }
 
 .hidden-username {
   display: none;

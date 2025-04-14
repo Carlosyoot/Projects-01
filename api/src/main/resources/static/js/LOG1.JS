@@ -423,6 +423,19 @@ function ShowToastSucess(message) {
     setTimeout(() => toast.remove(), 3000);
 }
 
+function ShowToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    const offset = document.querySelectorAll(".toast").length * 60; 
+    toast.style.top = `${20 + offset}px`;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+
 
 
 
@@ -558,13 +571,19 @@ closeOrgModal.addEventListener("click", () => {
 /////USERNAMEMODAL
 function showUsernameModal() {
     const modal = document.getElementById("usernameModal");
-    modal.classList.remove("hidden");
+    modal.classList.remove("hidden-username");
 
     document.getElementById("confirmUsername").addEventListener("click", () => {
         const name = document.getElementById("usernameInput").value.trim();
-        if (name.length < 2) {
-            alert("Nome muito curto!");
+        if (name.length <= 0) {
+            ShowToastError("Nome vazio");
             return;
+        }
+        else if(name.length < 5){
+            ShowToast("Nome muito curto", "error");
+            ShowToast("Crie um nome com no mínimo", "error");
+            ShowToast("6 letras", "error");
+            return
         }
 
         localStorage.setItem(LOCAL_STORAGE_NAME_KEY, name);
@@ -579,6 +598,9 @@ function showUsernameModal() {
         //    console.error("Erro ao salvar nome no backend:", err);
         //});
 
+
+        ShowToast("Nome definido com sucesso", "sucess");
+        ShowToast("Esse será o nome exibido nas notificações", "sucess");
         modal.classList.add("hidden-username");
     });
 }

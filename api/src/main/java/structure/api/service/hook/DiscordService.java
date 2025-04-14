@@ -1,5 +1,6 @@
 package structure.api.service.hook;
 
+import structure.api.config.EnvConfig.DiscordConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,14 @@ import java.util.Map;
 
 @Service
 public class DiscordService {
-    private static final String WEBHOOK_URL = "https://discord.com/api/webhooks/1360097640389410976/Hfl6uZvtphLRqtmiy0AqMjcS4rKPpverTn0gsRKNrnhy_HYGa0chZ5fuHiFOtdR3UCik";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    private final DiscordConfig config;
+    private final ObjectMapper objectMapper;
+    
+    public DiscordService(DiscordConfig config, ObjectMapper objectMapper) {
+        this.config = config;
+        this.objectMapper = objectMapper;
+    }
 
     public void enviarNotificacao(DiscordDTO dto) {
         try {
@@ -27,7 +34,7 @@ public class DiscordService {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(WEBHOOK_URL))
+                .uri(URI.create(config.webhookUrl()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload)))
                 .build();
