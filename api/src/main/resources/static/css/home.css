@@ -451,7 +451,7 @@ body {
 
 .org-button{
     position: absolute;
-    top: -8%;
+    top: -10%;
     right: 78%;
     margin-right: 15px; 
     background-color: transparent;
@@ -466,6 +466,25 @@ body {
     transition: color 0.2s ease;
     white-space: nowrap; 
 }
+.org-tasks{
+    position: absolute;
+    top: -10%;
+    left: 80%;
+    direction: rtl;
+    margin-right: 15px; 
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    z-index: 2;
+    transition: color 0.2s ease;
+    white-space: nowrap; 
+}
+
 
 .back-button i {
     font-size: 22px;
@@ -761,3 +780,127 @@ body {
 .hidden-username {
   display: none;
 }
+
+
+/* MODAL DE TASKS GERAIS! */
+
+.modal-content-task {
+    background: white;
+    padding: 20px;
+    flex-direction: column;
+    border-radius: 12px;
+    width: 80%;
+    z-index: 999;
+    max-width: 400px;
+}
+
+.modal-content-task h2 {
+    color: rgb(100, 99, 99);
+    padding-bottom: 10px;
+}
+
+
+
+.modal-content-task .mid {
+    width: 100%;
+    display: flex;
+    box-sizing: content-box;
+    flex-direction: column;
+    height: 240px;
+    padding-bottom: 10px;
+}
+
+.styled-select {
+    width: 80%;
+    padding-left: 3px;
+    height: 40px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.8em;
+    background-color: white;    
+    cursor: pointer;
+  }
+  
+  .styled-select:focus {
+    outline: none;
+    border-color: #999;
+  }
+
+.modal-content-task .mid > textarea {
+    margin-top: 15px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding-top: 10px;
+}
+
+.modal-content-task .footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+}
+
+.modal-content-task .footer #confirmTask-org {
+    background-color: rgb(69, 182, 84);
+    outline: none;
+    border: none;
+    width: 20%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    display: flex;
+    margin-left: 10px;
+}
+
+.modal-content-task .footer #cancelTask-org {
+    background-color: rgb(179, 50, 18);
+    outline: none;
+    height: 30px;
+    border: none;
+    color: white;
+    width: 10%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    display: flex;
+}
+
+.modal-content-task .footer #confirmTask-org:hover {
+    background-color: rgb(32, 218, 57);
+    cursor: pointer;
+}
+
+.modal-content-task .footer #cancelTask-org:hover {
+    background-color: rgb(209, 51, 11);
+    cursor: pointer;
+}
+
+.modal-content-task .alertSection {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-content-task #alertTimeInput-org {
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 150px;
+    transition: all 0.3s ease;
+}
+
+#title-org-task{
+    margin-top: 15px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+}
+
+

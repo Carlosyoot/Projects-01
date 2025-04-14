@@ -5,7 +5,9 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     
+    List<Task> findByOwner(String userId);
 
+    List<Task> findByOrganizationIdIn(List<String> orgIds);
     
     List<Task> findByFinishedTrue();
     List<Task> findByFinishedFalse();

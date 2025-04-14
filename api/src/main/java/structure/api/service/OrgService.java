@@ -22,6 +22,10 @@ public class OrgService {
     @Autowired
     private AnonUserRepository anonUserRepository;
 
+    public List<Org> buscarOrgsCriadasPor(String userId) {
+        return orgRepository.findByCreatorId(userId);
+    }
+
     @Transactional
     public Org criarOrganizacao(String userId, String orgId, String orgName) {
         if (!orgId.matches("^[a-zA-Z0-9-]+$")) {
@@ -102,6 +106,37 @@ public class OrgService {
             user.getOrgThree()
         ).stream().filter(Objects::nonNull).toList());
     }
+
+    @Transactional
+    public void removerMembro(String userId, String orgId) {
+        AnonUser user = anonUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        
+        Org org = orgRepository.findById(orgId)
+                .orElseThrow(() -> new RuntimeException("Organização não encontrada"));
+        
+        boolean wasMember = false;
+        
+        if (orgId.equals(user.getOrgOne())) {
+            user.setOrgOne(null);
+            wasMember = true;
+        } else if (orgId.equals(user.getOrgTwo())) {
+            user.setOrgTwo(null);
+            wasMember = true;
+        } else if (orgId.equals(user.getOrgThree())) {
+            user.setOrgThree(null);
+            wasMember = true;
+        }
+    
+        if (!wasMember) {
+            throw new RuntimeException("Usuário não é membro dessa organização");
+        }
+    
+        org.setMembers(Math.max(org.getMembers() - 1, 0)); // Evita contagem negativa
+    
+        anonUserRepository.save(user);
+        orgRepository.save(org);
+}
 
     @Transactional
     public void deletarOrganizacao(String userId, String orgId) {

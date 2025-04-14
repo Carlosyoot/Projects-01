@@ -1,6 +1,7 @@
 package structure.api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -17,9 +18,10 @@ public class Task {
     private Long id;
     
     @Column(nullable = false)
+    @NotBlank
     private String title;
     
-    @Column(length = 1000)
+    @Column(length = 1000)  
     private String details;
     
     @Column(nullable = false, updatable = false)
@@ -33,6 +35,10 @@ public class Task {
     
     @Column
     private String organizationId;
+
+    @Column
+    @NotBlank
+    private String owner;
     
     @PrePersist
     protected void onCreate() {

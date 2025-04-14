@@ -2,7 +2,12 @@ package structure.api.service.hook;
 
 import structure.api.config.EnvConfig.DiscordConfig;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -10,15 +15,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@RequiredArgsConstructor
 public class DiscordAuthService {
-    
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     private final DiscordConfig config;
-    private final RestTemplate restTemplate;
-    
-    public DiscordAuthService(DiscordConfig config) {
-        this.config = config;
-        this.restTemplate = new RestTemplate();
-    }
     
     public String getAuthorizationUrl(String state) {
         return "https://discord.com/api/oauth2/authorize" +
@@ -40,23 +44,37 @@ public class DiscordAuthService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         
+        // Verifique se as credenciais estão corretas
+        System.out.println("Usando Client ID: " + config.clientId());
+        System.out.println("Usando Client Secret: " + (config.clientSecret()));
+        
+        headers.setBasicAuth(config.clientId(), config.clientSecret());
+    
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", config.clientId());
-        body.add("client_secret", config.clientSecret());
         body.add("grant_type", "authorization_code");
         body.add("code", code);
         body.add("redirect_uri", config.redirectUri());
         body.add("scope", "identify");
-        
+    
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-        
-        ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
-            "https://discord.com/api/oauth2/token",
-            request,
-            TokenResponse.class
-        );
-        
-        return response.getBody().access_token();
+    
+        try {
+            System.out.println("Enviando requisição para Discord com body: " + body);
+            ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
+                "https://discord.com/api/oauth2/token",
+                request,
+                TokenResponse.class
+            );
+    
+            System.out.println("Resposta do Discord: " + response.getStatusCode());
+            return response.getBody().access_token();
+        } catch (HttpClientErrorException e) {
+            System.err.println("Erro completo na resposta do Discord:");
+            System.err.println("Status: " + e.getStatusCode());
+            System.err.println("Headers: " + e.getResponseHeaders());
+            System.err.println("Body: " + e.getResponseBodyAsString());
+            throw e;
+        }
     }
     
     private DiscordUser getUserData(String accessToken) {
@@ -80,4 +98,6 @@ public class DiscordAuthService {
     
     public record DiscordUser(String id, String username, String discriminator, 
                             String avatar, String email) {}
+
+    
 }

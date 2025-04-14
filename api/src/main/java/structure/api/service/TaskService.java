@@ -5,10 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import structure.api.model.AnonUser;
 import structure.api.model.Task;
+import structure.api.repository.AnonUserRepository;
 import structure.api.repository.TaskRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,6 +21,9 @@ public class TaskService {
     
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private AnonUserRepository anonUserRepository;
 
     @Transactional(readOnly = true)
     public List<Task> findAllTasks() {
@@ -27,6 +34,27 @@ public class TaskService {
     public Task findTaskById(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> findUserAndOrgTasks(String userId) {
+        List<Task> personalTasks = taskRepository.findByOwner(userId);
+
+        AnonUser anonUser = anonUserRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Usuário anônimo não encontrado"));
+
+        List<String> orgIds = new ArrayList<>();
+        if (anonUser.getOrgOne() != null) orgIds.add(anonUser.getOrgOne());
+        if (anonUser.getOrgTwo() != null) orgIds.add(anonUser.getOrgTwo());
+        if (anonUser.getOrgThree() != null) orgIds.add(anonUser.getOrgThree());
+
+        List<Task> orgTasks = orgIds.isEmpty() ? List.of() : taskRepository.findByOrganizationIdIn(orgIds);
+
+        List<Task> allTasks = new ArrayList<>();
+        allTasks.addAll(personalTasks);
+        allTasks.addAll(orgTasks);
+
+        return allTasks;
     }
     
     @Transactional

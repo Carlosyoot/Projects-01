@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 import structure.api.model.Task;
 import structure.api.service.TaskService;
 
@@ -29,8 +31,24 @@ public class TaskController {
         return ResponseEntity.ok(taskService.findTaskById(id));
     }
     
+    @GetMapping("/user-and-org/{userId}")
+    public ResponseEntity<List<Task>> getUserAndOrgTasks(@PathVariable String userId) {
+        return ResponseEntity.ok(taskService.findUserAndOrgTasks(userId));
+    }
+    
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+    public ResponseEntity<Task> createTask(@Valid @RequestBody Task task) {
+        Task createdTask = taskService.createTask(task);
+        return ResponseEntity.created(URI.create("/api/tasks/" + createdTask.getId()))
+                .body(createdTask);
+    }
+
+    @PostMapping("/org")
+    public ResponseEntity<Task> createOrgTask(@Valid @RequestBody Task task) {
+        if (task.getOrganizationId() == null || task.getOrganizationId().isBlank()) {
+            throw new IllegalArgumentException("organizationId é obrigatório para tarefas organizacionais");
+        }
+    
         Task createdTask = taskService.createTask(task);
         return ResponseEntity.created(URI.create("/api/tasks/" + createdTask.getId()))
                 .body(createdTask);

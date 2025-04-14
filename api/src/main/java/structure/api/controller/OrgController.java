@@ -47,6 +47,12 @@ public class OrgController {
         return ResponseEntity.status(HttpStatus.CREATED).body(org);
     }
 
+    @GetMapping("/created-by/{userId}")
+    public ResponseEntity<List<Org>> getOrgsCriadasPorUsuario(@PathVariable String userId) {
+        List<Org> orgsCriadas = orgService.buscarOrgsCriadasPor(userId);
+        return ResponseEntity.ok(orgsCriadas);
+    }
+
     @GetMapping("/{orgId}/members")
     public ResponseEntity<Integer> contarMembros(@PathVariable String orgId) {
         return ResponseEntity.ok(orgService.contarMembros(orgId));
@@ -71,6 +77,15 @@ public class OrgController {
             @RequestHeader("X-User-Id") String userId,
             @PathVariable String orgId) {
         orgService.deletarOrganizacao(userId, orgId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{orgId}/leave")
+    public ResponseEntity<Void> sairDaOrganizacao(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String orgId) {
+            
+        orgService.removerMembro(userId, orgId);
         return ResponseEntity.noContent().build();
     }
 
