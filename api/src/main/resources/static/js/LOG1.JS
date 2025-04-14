@@ -7,16 +7,32 @@ const cancelBtn = document.getElementById("cancelTask");
 const taskDetailsInput = document.getElementById("taskDetails");
 const sendAlertCheckbox = document.getElementById('sendAlertCheckbox');
 const alertTimeInput = document.getElementById('alertTimeInput');
+const openOrgModalBtn = document.getElementById("openOrgModalBtn");
+const orgModal = document.getElementById("orgModalCustom");
+const closeOrgModal = document.getElementById("closeOrgModal");
+const linkedOrgsContainer = document.getElementById("linkedOrgsCustom");
+const createOrgBtn = document.getElementById("createOrg");
+const orgNameInput = document.getElementById("orgNameInput");
+
 
 
 const API_URL = 'http://localhost:8080/api/tasks';
+const API_DISCORD_POST='http://localhost:8080/discord/post'
 const USER_API_URL = 'http://localhost:8080/api/users/anon';
+const API_ORG_VALIDATE ='http://localhost:8080/api/users/can-create-org'
+const API_ORG_POST='http://localhost:8080/api/orgs'
 const LOCAL_STORAGE_KEY = 'anonUserId';
+const LOCAL_STORAGE_NAME_KEY = "anonUsername";
+
+
 
 
 ///////EVENTOS DE LOCALSTORAGE
 
 let anonUserId = localStorage.getItem(LOCAL_STORAGE_KEY);
+let anonUsername = localStorage.getItem(LOCAL_STORAGE_NAME_KEY);
+
+
 
 
 
@@ -37,6 +53,11 @@ if (!anonUserId) {
     });
 } else {
     console.log("Usuário anônimo recuperado:", anonUserId);
+}
+
+
+if (!anonUsername) {
+    showUsernameModal();
 }
 
 
@@ -120,91 +141,39 @@ document.addEventListener("click", (e) => {
 });
 
 
-////CRIAR ORGANIZAÇÃO 
-document.addEventListener("DOMContentLoaded", () => {
-    const openOrgModalBtn = document.getElementById("openOrgModalBtn");
-    const orgModal = document.getElementById("orgModalCustom");
-    const closeOrgModal = document.getElementById("closeOrgModal");
-    const linkedOrgsContainer = document.getElementById("linkedOrgsCustom");
-    const createOrgBtn = document.getElementById("createOrg");
-    const orgNameInput = document.getElementById("orgNameInput");
 
-    let orgs = ['ida328432'];
-
-    const renderOrgs = () => {
-        linkedOrgsContainer.innerHTML = "";
     
-        orgs.forEach((orgId) => {
 
-            const orgMembers = Math.floor(Math.random() * 5) + 1; 
-    
-            const orgDiv = document.createElement("div");
-            orgDiv.className = "org-box";
-            orgDiv.innerHTML = `
-                <div class="orgI">
-                    <div class="org-name">
-                        <strong>Organização ${orgId}</strong>
-                    </div>
-    
-                    <div class="org-members">
-                        <i class='bx bx-user'></i>
-                        <span>${orgMembers} membro${orgMembers > 1 ? "s" : ""} conectado${orgMembers > 1 ? "s" : ""}</span>
-                    </div>
-    
-                    <div class="org-options">
-                        <button onclick="copyOrgLink('${orgId}')">Obter Link</button>
-                        <button onclick="removeOrg('${orgId}')">Sair</button>
-                    </div>
-                </div>
-            `;
-            linkedOrgsContainer.appendChild(orgDiv);
-        });
-    };
+createOrgBtn.addEventListener("click", async () => {
+    const orgName = orgNameInput.value.trim();
+    if (!orgName) return alert("Digite um nome para a organização");
 
-    createOrgBtn.addEventListener("click", () => {
-        const orgName = orgNameInput.value.trim();
-        if (!orgName) return alert("Digite um nome para a organização");
+    const userId = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const orgId = generateOrgId(orgName);
 
-        const orgId = "org-1" + Math.random().toString(36).substring(2, 8);
-        
-        if (orgs.length >= 3) return alert("Você já está em 3 organizações");
+    try {
+        await createOrgInBackend(orgName, orgId, userId);
 
-        orgs.push(orgId);
+        const link = generateOrgLink(orgName, orgId);
+        copyToClipboard(link);
+        alert("Organização criada! Link copiado: " + link);
+        ShowToastSucess("Organização criada com sucesso");
+
         renderOrgs();
-        alert("Organização criada! Link copiado.");
-        copyOrgLink(orgId);
-    });
-
-    window.copyOrgLink = (orgId) => {
-        const link = `${window.location.origin}${window.location.pathname}?org=${orgId}`;
-        navigator.clipboard.writeText(link);
-        alert("Link copiado: " + link);
-    };
-
-    window.removeOrg = (orgId) => {
-        orgs = orgs.filter((org) => org !== orgId);
-        renderOrgs();
-    };
-
-    const params = new URLSearchParams(window.location.search);
-    const orgParam = params.get("org");
-    if (orgParam) {
-        if (!orgs.includes(orgParam) && orgs.length < 3) {
-            orgs.push(orgParam);
-            alert("Você foi adicionado à organização: " + orgParam);
-            renderOrgs();
-        }
+        orgNameInput.value = "";
+    } catch (err) {
+        alert(err.message || "Erro ao criar organização");
     }
-
-    renderOrgs();
-
-
 });
 
 
 
 
+
+
+
 /////////////// FUNCÕES
+
 
 
 
@@ -263,7 +232,7 @@ const addDefaultTaskToDOM = () => {
     console.log("detalhe task dom")
 
     const task = {
-        id: 543, // pode ser qualquer ID fictício
+        id: 543, 
         title: "Implementação Default",
         details: "Criar endpoints para tasks",
         createdAt: new Date().toISOString(),
@@ -296,6 +265,60 @@ const addDefaultTaskToDOM = () => {
     taskList.insertAdjacentHTML('afterbegin', taskHTML);
 };
 
+////RENDERIZAR ORGANIZAÇÕES
+const renderOrgs = async () => {
+    try {
+        const userId = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const orgs = await fetchUserOrgs(userId);
+        
+        linkedOrgsContainer.innerHTML = "";
+        
+        if (orgs.length === 0) {
+            const noOrgsMessage = document.createElement("div");
+            noOrgsMessage.className = "no-orgs-message";
+            noOrgsMessage.textContent = "Você não participa de nenhuma organização no momento...";
+            linkedOrgsContainer.appendChild(noOrgsMessage);
+        } else {
+            orgs.forEach(org => {
+                const isOwner = org.creator.id === userId;
+                const orgDiv = document.createElement("div");
+                orgDiv.className = "org-box";
+                orgDiv.dataset.isOwner = isOwner;
+                
+                orgDiv.innerHTML = `
+                    <div class="orgI">
+                        <div class="org-info">
+                            <div class="org-name">
+                                <strong>${org.name}</strong>
+                            </div>
+                            <div class="org-members">
+                                <i class='bx bx-user'></i>
+                                <span>${org.members} membro${org.members !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                        <div class="org-options">
+                            <button class="btn-link" onclick="copyOrgLink('${org.id}')"> Obter Link
+                            </button>
+                            ${isOwner 
+                                ? `<button class="btn-danger" onclick="deleteOrg('${org.id}')">
+                                   Excluir
+                                </button>`
+                                : `<button class="btn-danger" onclick="leaveOrg('${org.id}')">
+                                    Sair
+                                </button>`}
+                        </div>
+                    </div>
+                    <div class="fancy-divider"></div>
+                `;
+                linkedOrgsContainer.appendChild(orgDiv);
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao carregar orgs:", error);
+        showError("Falha ao carregar organizações");
+    }
+};
+
 /////ENVIAR MENSAGEM NO DISCORD
 async function sendDiscord(taskId) {
 
@@ -324,7 +347,7 @@ async function sendDiscord(taskId) {
 
         console.log("Enviando para Discord:", discordPayload);
 
-        const response = await fetch('/discord/post', {
+        const response = await fetch(API_DISCORD_POST, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -343,10 +366,73 @@ async function sendDiscord(taskId) {
     }
 }
 
+async function checkOrgLimit(userId) {
+    const response = await fetch(API_ORG_VALIDATE, {
+        headers: { 'X-User-Id': userId }
+    });
+    return response.ok && (await response.json());
+}
+
+function generateOrgId(orgName) {
+    const normalized = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, '-');
+    
+    const randomId = Math.random().toString(36).substring(2, 6);
+    return `${normalized}-${randomId}`;
+}
+
+function copyOrgLink(orgId) {
+    const fullLink = generateOrgLink("ignored", orgId); 
+    copyToClipboard(fullLink);
+    alert("Link copiado para a área de transferência!");
+}
+
+
+function generateOrgLink(orgName, orgId) {
+    return `${window.location.origin}/join/${encodeURIComponent(orgId)}`;
+}
+
+async function fetchUserOrgs(userId) {
+    const response = await fetch(`/api/users/${userId}/orgs`);
+    if (!response.ok) throw new Error("Falha ao carregar organizações");
+    return response.json();
+}
+
+
 ///FUNCAO PADRAO DE ERRO HANDLE
 const showError = (message) => {
     alert(message); // Pode ser substituído por um toast ou modal de erro
 };
+
+function ShowToastError(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast error";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+
+function ShowToastSucess(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast success";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+
+
+
+////FUNCAO PARA COPIAR PARA O CAMPO DE TRANSF
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+        .then(() => console.log("Link copiado!" + text))
+        .catch(err => console.error("Falha ao copiar:", err));
+}
+
 
 
 
@@ -364,6 +450,8 @@ function updateClock() {
     
     timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
+
+
 
 
 
@@ -414,6 +502,36 @@ async function deleteTask(id) {
 }
 
 
+//////////////ADICIONAR ORGANIZAÇÃO
+async function createOrgInBackend(orgName, orgId, userId) {
+    try {
+        const response = await fetch('/api/orgs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-User-Id': userId
+            },
+            body: JSON.stringify({
+                orgId: orgId,
+                name: orgName
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Falha ao criar organização");
+        }
+
+
+        
+        return await response.json();
+    } catch (error) {
+        console.error("Erro ao criar organização:", error);
+        throw error; 
+    }
+}
+
+
 
 
 
@@ -435,6 +553,35 @@ openOrgModalBtn.addEventListener("click", () => {
 closeOrgModal.addEventListener("click", () => {
     orgModal.classList.add("hidden-org");
 });
+
+
+/////USERNAMEMODAL
+function showUsernameModal() {
+    const modal = document.getElementById("usernameModal");
+    modal.classList.remove("hidden");
+
+    document.getElementById("confirmUsername").addEventListener("click", () => {
+        const name = document.getElementById("usernameInput").value.trim();
+        if (name.length < 2) {
+            alert("Nome muito curto!");
+            return;
+        }
+
+        localStorage.setItem(LOCAL_STORAGE_NAME_KEY, name);
+        anonUsername = name;
+
+        //// Opcional: enviar para backend se quiser salvar junto ao user
+        //fetch(USER_API_URL, {
+        //    method: 'POST',
+        //    headers: { 'Content-Type': 'application/json' },
+        //    body: JSON.stringify({ userId: anonUserId, username: anonUsername })
+        //}).catch(err => {
+        //    console.error("Erro ao salvar nome no backend:", err);
+        //});
+
+        modal.classList.add("hidden-username");
+    });
+}
 
 
 
@@ -504,3 +651,45 @@ const formatDateTask= (dateString) => {
     //} catch (error) {
     //    console.error("Erro ao enviar notificação:", error);
     //}
+
+    window.deleteOrg = async (orgId) => {
+        if (!confirm("Tem certeza que deseja EXCLUIR PERMANENTEMENTE esta organização?")) return;
+        
+        try {
+            const userId = localStorage.getItem(LOCAL_STORAGE_KEY);
+            const response = await fetch(`/api/orgs/${orgId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-User-Id': userId
+                }
+            });
+            
+            if (!response.ok) throw new Error();
+            
+            await renderOrgs();
+            ShowToastSucess("Organização excluída com sucesso!");
+        } catch (error) {
+            ShowToastError("Falha ao excluir organização" + error);
+        }
+    };
+    
+    window.leaveOrg = async (orgId) => {
+        if (!confirm("Tem certeza que deseja sair desta organização?")) return;
+        
+        try {
+            const userId = localStorage.getItem(LOCAL_STORAGE_KEY);
+            const response = await fetch(`/api/orgs/${orgId}/leave`, {
+                method: 'POST',
+                headers: {
+                    'X-User-Id': userId
+                }
+            });
+            
+            if (!response.ok) throw new Error();
+            
+            await renderOrgs();
+            ShowToastSucess("Você saiu da organização");
+        } catch (error) {
+            ShowToastError(error.message || "Falha ao sair da organização");
+        }
+    };
