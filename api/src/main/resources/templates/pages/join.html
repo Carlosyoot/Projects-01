@@ -1,19 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="/css/join.css">
-    <script src="/js/scriptJoin.js" defer></script>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <script src="/js/scriptJoin.js" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Entrar na Organização</title>
 </head>
 <body>
   <div class="join-card">
-    <h2>Entrar na Organização</h2>
-    <p id="orgName">Carregando...</p>
-    <button id="joinBtn">Entrar</button>
+    <div class="join-header">
+      <div class="title-header">
+      <h2>Entrar na Organização</h2>
+      <p id="orgName">Organização: <strong>Carregando...</strong></p>
+      </div>
+      <div class="user-greeting">Olá, <strong>Carlos</strong> 👋</div> 
+    </div>
+  
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="discordLinkedCheckbox" disabled />
+      <label for="discordLinkedCheckbox">Conta Discord vinculada</label>
+    </div>
+  
+    <div class="button-wrapper">
+      <a href="/auth/discord/connect" id="linkDiscord">
+        <i class='bx bxl-discord'></i>
+        Vincular com Discord
+      </a>
+      <button id="joinBtn">Entrar</button>
+    </div>
+  
     <div class="message" id="msg"></div>
   </div>
+  
 </body>
 </html>
