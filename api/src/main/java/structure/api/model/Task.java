@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,15 +22,17 @@ public class Task {
     @Column(length = 1000)
     private String details;
     
-    
-    @Column(name = "created", nullable = false, updatable = false, columnDefinition = "TIMESTAMP(0)")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "modified", columnDefinition = "TIMESTAMP(0)")
+    @Column
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private boolean finished;
+    
+    @Column
+    private String organizationId;
     
     @PrePersist
     protected void onCreate() {
@@ -42,7 +43,7 @@ public class Task {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-    
+
     // Builder pattern customization for required fields
     public static TaskBuilder builder(String message, boolean finished) {
         return new TaskBuilder()
