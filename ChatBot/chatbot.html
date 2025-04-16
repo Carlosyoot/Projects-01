@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot com Notion</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f7fa;
+        }
+        
+        .chatbot-container {
+            display: flex;
+            height: 80vh;
+            width: 900px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        .chatbot-sidebar {
+            width: 200px;
+            background-color: #2f3437;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .save-button {
+            padding: 12px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: auto;
+            transition: background-color 0.2s;
+        }
+        
+        .save-button:hover {
+            background-color: #0d5bba;
+        }
+        
+        .save-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .chatbot-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+        
+        .bot-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+        }
+        
+        .chatbot-input-container {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background-color: white;
+            display: flex;
+        }
+        
+        #chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        #send-button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        #send-button:hover {
+            background-color: #0d5bba;
+        }
+        
+        .typing-indicator {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-sidebar">
+            <h2>Chatbot IA</h2>
+            <p>Converse e salve no Notion</p>
+            <button id="save-button" class="save-button" disabled>Salvar no Notion</button>
+        </div>
+        
+        <div class="chatbot-main">
+            <div class="chatbot-messages" id="chat-messages">
+                <div class="typing-indicator" id="typing-indicator">Bot está digitando...</div>
+            </div>
+            
+            <div class="chatbot-input-container">
+                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                <button id="send-button">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const chatMessages = document.getElementById('chat-messages');
+            const saveButton = document.getElementById('save-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+            
+            let conversation = [];
+            
+            // Função para simular a resposta da IA (substitua por uma chamada real à API)
+            async function getAIResponse(userMessage) {
+                // Simulando um tempo de resposta
+                typingIndicator.style.display = 'block';
+                
+                // Aqui você faria uma chamada real para a API de IA
+                // Exemplo com OpenAI (descomente e configure com sua API key):
+                /*
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer SUA_API_KEY_AQUI'
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: conversation
+                    })
+                });
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+                */
+                
+                // Simulação enquanto não tem a API real
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                typingIndicator.style.display = 'none';
+                
+                const responses = [
+                    "Olá! Como posso te ajudar hoje?",
+                    "Interessante! Posso te explicar mais sobre isso.",
+                    "Entendi sua pergunta. Vou pesquisar e te responder.",
+                    "Ótima pergunta! Aqui está o que sei sobre o assunto...",
+                    "Vou verificar isso para você. Um momento!"
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            // Função para simular o salvamento no Notion (substitua por uma chamada real à API)
+            async function saveToNotion() {
+                saveButton.disabled = true;
+                saveButton.textContent = 'Salvando...';
+                
+                // Aqui você faria uma chamada real para sua API que se conecta ao Notion
+                // Exemplo (descomente e configure):
+                /*
+                try {
+                    const response = await fetch('/api/save-to-notion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            conversation: conversation
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Conversa salva no Notion com sucesso!');
+                    } else {
+                        throw new Error('Erro ao salvar');
+                    }
+                } catch (error) {
+                    alert('Erro ao salvar no Notion: ' + error.message);
+                }
+                */
+                
+                // Simulação enquanto não tem a API real
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                alert('Simulação: Conversa seria salva no Notion!');
+                
+                saveButton.textContent = 'Salvar no Notion';
+                saveButton.disabled = false;
+            }
+            
+            // Adiciona uma mensagem ao chat
+            function addMessage(role, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(role === 'user' ? 'user-message' : 'bot-message');
+                messageDiv.textContent = content;
+                
+                // Insere antes do indicador de digitação
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                
+                // Rola para a mensagem mais recente
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Envia a mensagem do usuário
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+                
+                // Adiciona mensagem do usuário
+                addMessage('user', message);
+                conversation.push({ role: 'user', content: message });
+                
+                // Limpa o input
+                chatInput.value = '';
+                
+                // Habilita o botão de salvar
+                saveButton.disabled = false;
+                
+                // Obtém resposta da IA
+                const aiResponse = await getAIResponse(message);
+                
+                // Adiciona resposta do bot
+                addMessage('bot', aiResponse);
+                conversation.push({ role: 'assistant', content: aiResponse });
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            saveButton.addEventListener('click', saveToNotion);
+            
+            // Mensagem inicial do bot
+            setTimeout(() => {
+                const welcomeMessage = "Olá! Eu sou um chatbot integrado com IA. Como posso te ajudar hoje?";
+                addMessage('bot', welcomeMessage);
+                conversation.push({ role: 'assistant', content: welcomeMessage });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

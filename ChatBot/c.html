@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Configurações com Pato Dançante</title>
+    <style>
+        /* Estilo do botão de configurações */
+        #config-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #444;
+            border: none;
+            border-radius: 100%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 0;
+        }
+
+        #config-button svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+        }
+
+        /* Animação de rotação da engrenagem */
+        @keyframes rotateGear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #gear-icon.rotating {
+            animation: rotateGear 1s linear infinite;
+            transform-origin: center;
+        }
+
+        /* Estilo do painel de configurações */
+        #config-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 999;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            padding: 15px;
+            width: 250px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Estilo do pato dançante */
+        #dancing-duck {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            z-index: 1001;
+            pointer-events: none;
+            display: none   ;
+            transform: scaleX(-1);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        #duck-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        /* Painel de controles do pato */
+        #duck-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1002;
+            display: none;
+            width: 200px;
+        }
+
+        .duck-control-group {
+            margin-bottom: 10px;
+        }
+
+        .duck-control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .duck-control-group input {
+            width: 100%;
+        }
+
+        /* Estilos dos itens de configuração */
+        .config-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .config-label {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Estilo do toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Toggle desabilitado */
+        .toggle-switch.disabled {
+            opacity: 0.6;
+        }
+
+        .toggle-switch.disabled .toggle-slider {
+            cursor: not-allowed;
+        }
+
+        /* Campo de webhook */
+        #webhook-field {
+            display: none;
+            margin-top: 5px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 18px);
+        }
+
+        /* Botões */
+        .login-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* Status de login */
+        .login-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .show-panel {
+            display: flex !important;
+            animation: slideDown 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Botão de configurações -->
+<button id="config-button" onclick="toggleConfigPanel()">
+    <svg id="gear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M19.14,12.94a7.25,7.25,0,0,0,.05-.94,7.25,7.25,0,0,0-.05-.94l2.11-1.65a.48.48,0,0,0,.11-.61l-2-3.46a.5.5,0,0,0-.6-.22l-2.49,1a6.91,6.91,0,0,0-1.63-.94l-.38-2.65A.49.49,0,0,0,13.2,3H10.8a.49.49,0,0,0-.49.42l-.38,2.65a6.91,6.91,0,0,0-1.63.94l-2.49-1a.5.5,0,0,0-.6.22l-2,3.46a.48.48,0,0,0,.11.61L4.86,11.06a7.25,7.25,0,0,0-.05.94,7.25,7.25,0,0,0,.05.94L2.75,14.59a.48.48,0,0,0-.11.61l2,3.46a.5.5,0,0,0,.6.22l2.49-1a6.91,6.91,0,0,0,1.63.94l.38,2.65A.49.49,0,0,0,10.8,21h2.4a.49.49,0,0,0,.49-.42l.38-2.65a6.91,6.91,0,0,0,1.63-.94l2.49,1a.5.5,0,0,0,.6-.22l2-3.46a.48.48,0,0,0-.11-.61ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+    </svg>
+</button>
+
+<!-- Painel de configurações -->
+<div id="config-panel">
+    <!-- Conteúdo do painel -->
+    <h3 style="margin-top: 0; margin-bottom: 10px;">Configurações</h3>
+
+    <!-- Área de login -->
+    <div id="login-area">
+        <div id="user-not-logged" style="display: flex; flex-direction: column; gap: 8px;">
+            <button id="login-btn" class="login-btn">Fazer Login</button>
+            <div class="login-status">Você não está logado</div>
+        </div>
+
+        <div id="user-logged" style="display: none; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="config-label">Usuário logado</span>
+                <span id="username-display" style="font-weight: bold;"></span>
+            </div>
+            <button id="logout-btn" class="login-btn" style="background: #f44336;">Sair</button>
+        </div>
+    </div>
+
+    <!-- Toggles de configuração -->
+    <div class="config-item">
+        <span class="config-label">Modo Premium</span>
+        <label class="toggle-switch disabled" id="login-toggle-container">
+            <input type="checkbox" id="login-toggle" disabled>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <div class="login-status" id="toggle-status">Faça login para ativar</div>
+
+    <div class="config-item">
+        <span class="config-label">Opção 1</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="option1">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="config-item">
+        <span class="config-label">Opção 2</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="option2" checked>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <div class="config-item">
+        <span class="config-label">Webhook</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="webhook-toggle">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <input type="text" id="webhook-field" placeholder="Digite a URL do webhook">
+
+    <button id="toggle-duck-controls" style="padding: 8px 15px; background: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Configurar Pato
+    </button>
+
+    <button onclick="saveConfig()" style="margin-top: 10px; padding: 8px 15px; align-self: flex-end; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Salvar</button>
+</div>
+
+<!-- Pato dançante com fundo transparente -->
+<div id="dancing-duck">
+    <!-- Substitua pelo caminho do seu GIF transparente -->
+    <img id="duck-gif" src="pato.gif" alt="Pato dançante">
+</div>
+
+<!-- Painel de controles do pato -->
+<div id="duck-controls">
+    <h4 style="margin-top: 0; margin-bottom: 10px;">Controles do Pato</h4>
+    
+    <div class="duck-control-group">
+        <label for="duck-size">Tamanho (px)</label>
+        <input type="range" id="duck-size" min="40" max="150" value="80">
+    </div>
+    
+    <div class="duck-control-group">
+        <label for="duck-position-x">Posição X (px)</label>
+        <input type="range" id="duck-position-x" min="-100" max="100" value="0">
+    </div>
+    
+    <div class="duck-control-group">
+        <label for="duck-position-y">Posição Y (px)</label>
+        <input type="range" id="duck-position-y" min="-100" max="100" value="0">
+    </div>
+    
+    <button id="close-duck-controls" style="margin-top: 10px; padding: 5px 10px;">Fechar</button>
+</div>
+
+<script>
+    // Estado de login
+    let isLoggedIn = false;
+    let currentUser = null;
+
+    let duckVisible = true;
+
+    document.getElementById('toggle-duck-controls').addEventListener('click', () => {
+        if (duckVisible) {
+            document.getElementById('duck-controls').style.display = 'block';
+        } else {
+            document.getElementById('dancing-duck').style.display = 'none';
+            document.getElementById('duck-controls').style.display = 'none';
+        }
+    });
+
+    // Alternar visibilidade do painel
+    function toggleConfigPanel() {
+        const panel = document.getElementById('config-panel');
+        const gear = document.getElementById('gear-icon');
+        const duck = document.getElementById('dancing-duck');
+
+        panel.classList.toggle('show-panel');
+
+        if (panel.classList.contains('show-panel')) {
+            gear.classList.add('rotating');
+            duck.style.display = 'block';
+        } else {
+            gear.classList.remove('rotating');
+            duck.style.display = 'none';
+            document.getElementById('duck-controls').style.display = 'none';
+        }
+    }
+
+    // Função para salvar configurações
+    function saveConfig() {
+        alert('Configurações salvas!');
+        toggleConfigPanel();
+    }
+
+    // Função de login
+    function doLogin() {
+        isLoggedIn = true;
+        currentUser = "Usuário Exemplo";
+        updateLoginUI();
+
+        // Habilita o toggle de login
+        const toggle = document.getElementById('login-toggle');
+        const container = document.getElementById('login-toggle-container');
+        toggle.disabled = false;
+        container.classList.remove('disabled');
+        document.getElementById('toggle-status').textContent = "Toggle habilitado";
+    }
+
+    // Função de logout
+    function doLogout() {
+        isLoggedIn = false;
+        currentUser = null;
+        updateLoginUI();
+
+        // Desabilita o toggle de login
+        const toggle = document.getElementById('login-toggle');
+        const container = document.getElementById('login-toggle-container');
+        toggle.disabled = true;
+        toggle.checked = false;
+        container.classList.add('disabled');
+        document.getElementById('toggle-status').textContent = "Faça login para ativar";
+    }
+
+    // Atualiza a interface com base no estado de login
+    function updateLoginUI() {
+        if (isLoggedIn) {
+            document.getElementById('user-not-logged').style.display = 'none';
+            document.getElementById('user-logged').style.display = 'flex';
+            document.getElementById('username-display').textContent = currentUser;
+        } else {
+            document.getElementById('user-not-logged').style.display = 'flex';
+            document.getElementById('user-logged').style.display = 'none';
+        }
+    }
+
+    // Controle do toggle do webhook
+    document.getElementById('webhook-toggle').addEventListener('change', function() {
+        const webhookField = document.getElementById('webhook-field');
+        webhookField.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Botão de login
+    document.getElementById('login-btn').addEventListener('click', doLogin);
+    
+    // Botão de logout
+    document.getElementById('logout-btn').addEventListener('click', doLogout);
+
+    // Configuração dos controles do pato
+    function setupDuckControls() {
+        const duck = document.getElementById('dancing-duck');
+        const duckGif = document.getElementById('duck-gif');
+        
+        // Posição inicial do pato
+        let duckPosition = {
+            x: 20,
+            y: 10
+        };
+        
+        // Toggle controles ao clicar no pato
+        duckGif.addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('duck-controls').style.display = 'block';
+        });
+        
+        // Fechar controles
+        document.getElementById('close-duck-controls').addEventListener('click', function() {
+            document.getElementById('duck-controls').style.display = 'none';
+        });
+        
+        // Controles de tamanho
+        document.getElementById('duck-size').addEventListener('input', function() {
+            const size = this.value;
+            duck.style.width = size + 'px';
+            duck.style.height = size + 'px';
+        });
+        
+        // Controles de posição X (horizontal)
+        document.getElementById('duck-position-x').addEventListener('input', function() {
+            duckPosition.x = 20 + parseInt(this.value);
+            duck.style.right = duckPosition.x + 'px';
+        });
+        
+        // Controles de posição Y (vertical)
+        document.getElementById('duck-position-y').addEventListener('input', function() {
+            duckPosition.y = 10 + parseInt(this.value);
+            duck.style.top = duckPosition.y + 'px';
+        });
+    }
+
+    // Fechar o painel se clicar fora dele
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('config-panel');
+        const button = document.getElementById('config-button');
+        const duckControls = document.getElementById('duck-controls');
+        
+        if (!panel.contains(event.target) && !button.contains(event.target) && 
+            !duckControls.contains(event.target) && event.target.id !== 'duck-gif') {
+            panel.classList.remove('show-panel');
+            document.getElementById('gear-icon').classList.remove('rotating');
+            document.getElementById('dancing-duck').classList.remove('dancing');
+        }
+    });
+
+    // Inicialização
+    updateLoginUI();
+    setupDuckControls();
+</script>
+</body>
+</html>
