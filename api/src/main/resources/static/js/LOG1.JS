@@ -197,6 +197,15 @@ createOrgBtn.addEventListener("click", async () => {
 
 //CARREGAR LISTA DO BANCO
 const loadAllTasks = async (userId) => {
+
+   
+    if (!localStorage.getItem('hasAccessedBefore')) {
+  
+        localStorage.setItem('hasAccessedBefore', 'true');
+        console.log("Primeiro acesso - nenhuma tarefa carregada.");
+        return;
+    }
+
     try {
         const response = await fetch(`/api/tasks/user-and-org/${userId}`);
         let tasks = await response.json();
@@ -490,12 +499,16 @@ function updateClock() {
 
 //ADICIONAR
 const addTask = async (taskText, details = "") => {
+
+    const owner = localStorage.getItem("anonUserId");
+
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                title: taskText,  
+                title: taskText, 
+                owner: owner,    
                 details: details,
                 finished: false
             })
